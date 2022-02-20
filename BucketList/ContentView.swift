@@ -21,6 +21,7 @@ struct ContentView: View {
     @State private var mapRegion = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: 46.22, longitude: 6.08), span: MKCoordinateSpan(latitudeDelta: 20, longitudeDelta: 20))
     @State private var isUnlocked = false
     @State private var locations = [Location]()
+    @State private var selectedPlace: Location?
     
     //    struct Location: Identifiable {
     //        let id = UUID()
@@ -71,6 +72,10 @@ struct ContentView: View {
                             .clipShape(Circle())
                         
                         Text(location.name)
+                            .fixedSize()
+                    }
+                    .onTapGesture {
+                        selectedPlace = location
                     }
                 }
             }
@@ -101,6 +106,14 @@ struct ContentView: View {
                     .clipShape(Circle())
                     .padding(.trailing)
                     
+                }
+            }
+        }
+        .sheet(item: $selectedPlace) { place in
+            //Text(place.name)
+            EditView(location: place) { newLocation in 
+                if let index = locations.firstIndex(of: place) {
+                    locations[index] = newLocation
                 }
             }
         }
