@@ -18,43 +18,110 @@ struct ContentView: View {
     //        //just send back the first one, ought to be the only one
     //        return paths[0]
     //    }
-    @State private var mapRegion = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: 51.5, longitude: -0.12), span: MKCoordinateSpan(latitudeDelta: 0.2, longitudeDelta: 0.2))
+    @State private var mapRegion = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: 46.22, longitude: 6.08), span: MKCoordinateSpan(latitudeDelta: 20, longitudeDelta: 20))
     @State private var isUnlocked = false
+    @State private var locations = [Location]()
     
-    let locations = [
-        Location(name: "Buckingham Palace", coordinate: CLLocationCoordinate2D(latitude: 51.501, longitude: -0.141)),
-        Location(name: "Tower of London", coordinate: CLLocationCoordinate2D(latitude: 51.508, longitude: -0.076))
-    ]
+    //    struct Location: Identifiable {
+    //        let id = UUID()
+    //        let name: String
+    //        let coordinate: CLLocationCoordinate2D
+    //    }
+    //
+    //    let locations = [
+    //        Location(name: "Buckingham Palace", coordinate: CLLocationCoordinate2D(latitude: 51.501, longitude: -0.141)),
+    //        Location(name: "Tower of London", coordinate: CLLocationCoordinate2D(latitude: 51.508, longitude: -0.076))
+    //    ]
+    
+    //    func authenticate() {
+    //        let context = LAContext()
+    //        var error: NSError?
+    //
+    //        //check whether biometric authentication is possible
+    //        if context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) {
+    //
+    //            //if possible, go ahead and use it
+    //            let reason = "We need to unlock your data."
+    //
+    //            context.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: reason) { success, authenticationError in
+    //                //authentication has now completed
+    //                if success {
+    //                    isUnlocked = true
+    //                } else {
+    //                    //there was a problem
+    //                }
+    //
+    //            }
+    //        } else {
+    //            //no biometrics
+    //        }
+    //    }
+    
     var body: some View {
-        VStack {
-            if isUnlocked {
-                Text("Unlocked")
-            } else {
-                Text("Locked")
+        ZStack {
+            Map(coordinateRegion: $mapRegion, annotationItems: locations) { location in
+                MapMarker(coordinate: CLLocationCoordinate2D(latitude: location.latitude, longitude: location.longitude))
+            }
+            .ignoresSafeArea()
+            
+            Circle()
+                .fill(.blue)
+                .opacity(0.3)
+                .frame(width: 32, height: 32)
+            VStack {
+                
+                Spacer()
+                
+                HStack {
+                    Spacer()
+                    Button {
+                        //create a new location
+                        let newLocation = Location(id: UUID(), name: "New location", description: "", latitude: mapRegion.center.latitude, longitude: mapRegion.center.longitude)
+                        locations.append(newLocation)
+                        
+                    } label: {
+                        Image(systemName: "plus")
+                    }
+                    .padding()
+                    .background(.black.opacity(0.75))
+                    .foregroundColor(.white)
+                    .font(.title)
+                    .clipShape(Circle())
+                    .padding(.trailing)
+                    
+                }
             }
         }
-        .onAppear(perform: authenticate)
+        
+        //        VStack {
+        //            if isUnlocked {
+        //                Text("Unlocked")
+        //            } else {
+        //                Text("Locked")
+        //            }
+        //        }
+        //        .onAppear(perform: authenticate)
         
         
-//        NavigationView {
-//            Map(coordinateRegion: $mapRegion, annotationItems: locations) { location in
-//                MapAnnotation(coordinate: location.coordinate) {
-//                    NavigationLink {
-//                        Text(location.name)
-//                    } label: {
-//                        Circle()
-//                            .stroke(.red, lineWidth: 2)
-//                            .frame(width: 20, height: 20)
-//                        //                        .onTapGesture {
-//                        //                            print("Tapped on \(location.name)")
-//                        //                        }
-//                    }
-//
-//                }
-//
-//            }
-//            .navigationTitle("London Explorer")
-//        }
+        //        NavigationView {
+        //            Map(coordinateRegion: $mapRegion, annotationItems: locations) { location in
+        //                MapAnnotation(coordinate: location.coordinate) {
+        //                    NavigationLink {
+        //                        Text(location.name)
+        //                    } label: {
+        //                        Circle()
+        //                            .stroke(.red, lineWidth: 2)
+        //                            .frame(width: 20, height: 20)
+        //                        //                        .onTapGesture {
+        //                        //                            print("Tapped on \(location.name)")
+        //                        //                        }
+        //                    }
+        //
+        //                }
+        //
+        //            }
+        //            .navigationTitle("London Explorer")
+        //        }
         
         
         //        Text("Hello, world!")
@@ -71,36 +138,6 @@ struct ContentView: View {
         //                }
         //            }
         //            .padding()
-    }
-    
-    struct Location: Identifiable {
-        let id = UUID()
-        let name: String
-        let coordinate: CLLocationCoordinate2D
-    }
-    
-    func authenticate() {
-        let context = LAContext()
-        var error: NSError?
-        
-        //check whether biometric authentication is possible
-        if context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) {
-            
-            //if possible, go ahead and use it
-            let reason = "We need to unlock your data."
-            
-            context.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: reason) { success, authenticationError in
-                //authentication has now completed
-                if success {
-                    isUnlocked = true
-                } else {
-                        //there was a problem
-                    }
-                
-            }
-        } else {
-            //no biometrics
-        }
     }
 }
 
