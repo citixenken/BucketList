@@ -18,10 +18,9 @@ struct ContentView: View {
     //        //just send back the first one, ought to be the only one
     //        return paths[0]
     //    }
-    @State private var mapRegion = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: 46.22, longitude: 6.08), span: MKCoordinateSpan(latitudeDelta: 20, longitudeDelta: 20))
+    @StateObject private var viewModel = ViewModel()
     @State private var isUnlocked = false
-    @State private var locations = [Location]()
-    @State private var selectedPlace: Location?
+    
     
     //    struct Location: Identifiable {
     //        let id = UUID()
@@ -60,7 +59,7 @@ struct ContentView: View {
     
     var body: some View {
         ZStack {
-            Map(coordinateRegion: $mapRegion, annotationItems: locations) { location in
+            Map(coordinateRegion: $viewModel.mapRegion, annotationItems: viewModel.locations) { location in
                 //MapMarker(coordinate: CLLocationCoordinate2D(latitude: location.latitude, longitude: location.longitude))
                 MapAnnotation(coordinate: location.coordinate) {
                     VStack {
@@ -75,7 +74,7 @@ struct ContentView: View {
                             .fixedSize()
                     }
                     .onTapGesture {
-                        selectedPlace = location
+                        viewModel.selectedPlace = location
                     }
                 }
             }
@@ -93,8 +92,7 @@ struct ContentView: View {
                     Spacer()
                     Button {
                         //create a new location
-                        let newLocation = Location(id: UUID(), name: "New location", description: "", latitude: mapRegion.center.latitude, longitude: mapRegion.center.longitude)
-                        locations.append(newLocation)
+                        viewModel.addLocation()
                         
                     } label: {
                         Image(systemName: "plus")
@@ -109,12 +107,10 @@ struct ContentView: View {
                 }
             }
         }
-        .sheet(item: $selectedPlace) { place in
+        .sheet(item: $viewModel.selectedPlace) { place in
             //Text(place.name)
-            EditView(location: place) { newLocation in 
-                if let index = locations.firstIndex(of: place) {
-                    locations[index] = newLocation
-                }
+            EditView(location: place) { 
+                viewModel.update(location: $0)
             }
         }
         
