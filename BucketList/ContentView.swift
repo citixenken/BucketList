@@ -19,8 +19,6 @@ struct ContentView: View {
     //        return paths[0]
     //    }
     @StateObject private var viewModel = ViewModel()
-    @State private var isUnlocked = false
-    
     
     //    struct Location: Identifiable {
     //        let id = UUID()
@@ -58,60 +56,73 @@ struct ContentView: View {
     //    }
     
     var body: some View {
-        ZStack {
-            Map(coordinateRegion: $viewModel.mapRegion, annotationItems: viewModel.locations) { location in
-                //MapMarker(coordinate: CLLocationCoordinate2D(latitude: location.latitude, longitude: location.longitude))
-                MapAnnotation(coordinate: location.coordinate) {
-                    VStack {
-                        Image(systemName: "star.circle")
-                            .resizable()
-                            .foregroundColor(.red)
-                            .frame(width: 20, height: 20)
-                            .background(.white)
-                            .clipShape(Circle())
-                        
-                        Text(location.name)
-                            .fixedSize()
-                    }
-                    .onTapGesture {
-                        viewModel.selectedPlace = location
-                    }
-                }
-            }
-            .ignoresSafeArea()
+        if viewModel.isUnlocked {
             
-            Circle()
-                .fill(.blue)
-                .opacity(0.3)
-                .frame(width: 32, height: 32)
-            VStack {
-                
-                Spacer()
-                
-                HStack {
-                    Spacer()
-                    Button {
-                        //create a new location
-                        viewModel.addLocation()
-                        
-                    } label: {
-                        Image(systemName: "plus")
+            ZStack {
+                Map(coordinateRegion: $viewModel.mapRegion, annotationItems: viewModel.locations) { location in
+                    //MapMarker(coordinate: CLLocationCoordinate2D(latitude: location.latitude, longitude: location.longitude))
+                    MapAnnotation(coordinate: location.coordinate) {
+                        VStack {
+                            Image(systemName: "star.circle")
+                                .resizable()
+                                .foregroundColor(.red)
+                                .frame(width: 20, height: 20)
+                                .background(.white)
+                                .clipShape(Circle())
+                            
+                            Text(location.name)
+                                .fixedSize()
+                                .foregroundStyle(.secondary)
+                        }
+                        .onTapGesture {
+                            viewModel.selectedPlace = location
+                        }
                     }
-                    .padding()
-                    .background(.black.opacity(0.75))
-                    .foregroundColor(.white)
-                    .font(.title)
-                    .clipShape(Circle())
-                    .padding(.trailing)
+                }
+                .ignoresSafeArea()
+                
+                Circle()
+                    .fill(.blue)
+                    .opacity(0.3)
+                    .frame(width: 32, height: 32)
+                VStack {
                     
+                    Spacer()
+                    
+                    HStack {
+                        Spacer()
+                        Button {
+                            //create a new location
+                            viewModel.addLocation()
+                            
+                        } label: {
+                            Image(systemName: "plus")
+                        }
+                        .padding()
+                        .background(.black.opacity(0.75))
+                        .foregroundColor(.white)
+                        .font(.title)
+                        .clipShape(Circle())
+                        .padding(.trailing)
+                        
+                    }
                 }
             }
-        }
-        .sheet(item: $viewModel.selectedPlace) { place in
-            //Text(place.name)
-            EditView(location: place) { 
-                viewModel.update(location: $0)
+            .sheet(item: $viewModel.selectedPlace) { place in
+                //Text(place.name)
+                EditView(location: place) {
+                    viewModel.update(location: $0)
+                }
             }
+        } else {
+            //button here
+            Button("Unlock Places") {
+                viewModel.authenticate()
+            }
+            .padding()
+            .background(.blue)
+            .foregroundColor(.white)
+            .clipShape(Capsule())
         }
         
         //        VStack {

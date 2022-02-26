@@ -7,6 +7,7 @@
 
 import Foundation
 import MapKit
+import LocalAuthentication
 
 class ViewModel: ObservableObject {
     
@@ -14,6 +15,7 @@ class ViewModel: ObservableObject {
 
 extension ContentView {
     @MainActor class ViewModel: ObservableObject {
+        @Published var isUnlocked = false
         @Published var mapRegion = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: 46.22, longitude: 6.08), span: MKCoordinateSpan(latitudeDelta: 20, longitudeDelta: 20))
         @Published private(set) var locations: [Location]
         @Published var selectedPlace: Location?
@@ -52,6 +54,29 @@ extension ContentView {
                 try data.write(to: savePath, options: [.atomic, .completeFileProtection])
             } catch {
                 print("Unable to save data")
+            }
+        }
+        
+        func authenticate() {
+            let context = LAContext()
+            var error: NSError?
+            
+            if context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) {
+                let reason = "Please authenticate yourself to unlock your places." // For TouchID
+                
+                context.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: reason) { success, authenticationError in
+                    
+                    if success {
+                        Task { @MainActor in
+                                self.isUnlocked = true
+                            
+                        }
+                    } else {
+                        //error
+                    }
+                }
+            } else {
+                //no biometrics
             }
         }
     }
